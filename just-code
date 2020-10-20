@@ -1,0 +1,140 @@
+from ipywidgets import interactive
+import matplotlib.pyplot as plt
+import random
+
+class Box:
+    def __init__(self, left, right, bot, top):
+        self.left = left
+        self.right = right
+        self.top = top
+        self.bot = bot
+
+def random_num_gen(A, B, M):
+    numbers = [1,2,3,4,5,6,7,8,9]
+    start = random.choice(numbers)
+    lis = []
+
+    for result in range(6):
+        new = ((start * A) + B) % M
+        start = new
+        lis.append(start)
+    choice = random.choice(lis)
+
+    return choice
+
+
+def flip_x(side, pos_f, pos_i, vel_i, vel_f):
+    pos_f[0] = side
+    time = (pos_i[0] - side)/vel_i[0]
+    vel_f[0] *= -1
+    pos_f[0] = pos_i[0] + vel_f[0]*time
+
+def flip_y(pos_f, pos_i, vel_i, vel_f, acc, universe):
+    pos_f[1] = universe.bot
+    time = -pos_i[1]/vel_i[1]
+    vel_f[1] = -(vel_i[1] - acc[1]*time)
+    pos_f[1] = pos_i[1] + vel_f[1]*time
+
+
+def shift(x, y, p, m, pos_f):
+    pos_f[0] += x * p
+    pos_f[1] += y * m
+
+
+def teleporter(wormhole, pos_f):
+    if wormhole.left <= pos_f[0] <= wormhole.right and wormhole.bot <= pos_f[1] <= wormhole.top:
+        x = random_num_gen(4,2,9)
+        print(x)
+        if x == 0:
+            shift(5, 12, 1, 1, pos_f)
+        elif x == 1:
+            shift(25, 11, -1, 1, pos_f)
+        elif x == 2:
+            shift(10, 5, 1, -1, pos_f)
+        elif x == 3:
+            shift(9, 8, 1, 1, pos_f)
+        elif x == 4:
+            shift(20, 10, -1, -1, pos_f)
+        elif x == 5:
+            shift(12, 7, 1, -1, pos_f)
+        elif x == 6:
+            shift(10, 14, -1, 1, pos_f)
+        elif x == 7:
+            shift(17, 8, -1, -1, pos_f)
+        elif x == 8:
+            shift(18, 25, 1, 1, pos_f)
+        else:
+            pass
+    else:
+        pass
+
+
+def move(pos_i, vel_i, g, dt, wormhole, universe, mass, k, viscous):
+    vel_f = [vel_i[0],vel_i[1]]
+    pos_f = [pos_i[0],pos_i[1]]
+
+    if vel_f[0] >= 0:
+        viscous[0] = -(vel_f[0] ** 2)/mass
+    else:
+        viscous[0] = (vel_f[0] ** 2)/mass
+    if vel_f[1] >= 0:
+        viscous[1] = -(vel_f[1] ** 2)/mass
+    else:
+        viscous[1] = (vel_f[1] ** 2)/mass
+
+    center = (pos_f[1] - 25)
+    ar = [0, -(k * center)]
+
+    acc = [g[0] + viscous[0] + ar[0], g[1] + viscous[1] + ar[1]]
+    vel_f[0] = vel_i[0] + acc[0] * dt
+    vel_f[1] = vel_i[1] + acc[1] * dt
+    pos_f[0] = pos_i[0] + vel_i[0] * dt
+    pos_f[1] = pos_i[1] + vel_i[1] * dt
+
+    if universe.bot < pos_f[1] < universe.top:
+        pass
+    else:
+        flip_y(pos_f, pos_i, vel_i, vel_f, acc, universe)
+
+    if universe.left < pos_f[0] < universe.right:
+            pass
+    elif pos_f[0] > (universe.right / 2):
+        flip_x(universe.right, pos_f, pos_i, vel_i, vel_f)
+    elif pos_f[0] < (universe.right / 2):
+        flip_x(universe.left, pos_f, pos_i, vel_i, vel_f)
+
+    teleporter(wormhole, pos_f)
+
+    return (pos_f, vel_f)
+
+
+def run_sim(k=0.5, gy=-4.81):
+    wormhole = Box(25,30,15,20)
+    universe = Box(0,50,0,50)
+    dt = 0.25
+    i = 0
+    mass = 25
+    pos_i = [1, 40]
+    vel_i = [5, 0]
+    g = [0, gy]
+    X = []
+    Y = []
+    viscous = [0,0]
+
+    while i < 75:
+        pos_i, vel_i = move(pos_i, vel_i, g, dt, wormhole, universe, mass, k, viscous)
+        X.append(pos_i[0])
+        Y.append(pos_i[1])
+        i+=1
+
+    fig , ax = plt.subplots(figsize = (4, 4))
+    time.sleep(0.1)
+    plt.scatter(X,Y)
+    plt.plot(X,Y)
+    plt.xlim(-1, 51)
+    plt.ylim(-1, 51)
+    fig.canvas.draw()
+
+
+attributes = interactive(run_sim, k=(0.1,2,0.1), gy=(-10.0, -1.0, 0.5), continuous_update=True)
+attributes
