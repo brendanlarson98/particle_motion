@@ -4,7 +4,7 @@
     import matplotlib.pyplot as plt
     import random
 
-### Just creating a nice rectangle shape for later. Also, a visualized standard number generator.
+### We create a nice rectangle shape for later. Also, a visualized standard number generator.
     class Box:
         def __init__(self, left, right, bot, top):
             self.left = left
@@ -25,7 +25,7 @@
 
         return choice
 
-### created functions to flip the particle so it will bounce off the sides of our container correctly. These are based off of standard kinematics.
+### We create functions, based off of standard kinematics to flip the particle so it will bounce off the sides of our container correctly.
     def flip_x(side, pos_f, pos_i, vel_i, vel_f):
         pos_f[0] = side
         time = (pos_i[0] - side)/vel_i[0]
@@ -38,12 +38,12 @@
         vel_f[1] = -(vel_i[1] - acc[1]*time)
         pos_f[1] = pos_i[1] + vel_f[1]*time
     
-### we create a shift function for a teleporter, this moves the particle left or right (whether p or m is positive or negative) by the amount of x or y
+    
+### The nuts and bolts of a teleporter for our particle. In our wormhole box, we run a random number generator, and the number returned triggers the particle to be shifted somewhere else in the 'universe.' We create a shift function for the teleporter. The function moves the particle left or right (whether p or m is positive or negative) by the amount of x or y.
     def shift(x, y, p, m, pos_f):
         pos_f[0] += x * p
         pos_f[1] += y * m
-    
-### The nuts and bolts of a teleporter for our particle. In our wormhole box, we run a random number generator, and the number returned triggers the particle to be shifted somewhere else in the 'universe'
+        
     def teleporter(wormhole, pos_f):
         if wormhole.left <= pos_f[0] <= wormhole.right and wormhole.bot <= pos_f[1] <= wormhole.top:
             x = random_num_gen(4,2,9)
@@ -91,7 +91,7 @@
         center = (pos_f[1] - 25)
         ar = [0, -(k * center)]
     
-#### we sum our gravitational, viscous, and central force accelerations, and then apply the method of finite differences
+#### We sum our gravitational, viscous, and central force accelerations, and then apply the method of finite differences.
         acc = [g[0] + viscous[0] + ar[0], g[1] + viscous[1] + ar[1]]
         vel_f[0] = vel_i[0] + acc[0] * dt
         vel_f[1] = vel_i[1] + acc[1] * dt
@@ -117,7 +117,7 @@
 
         return (pos_f, vel_f)
 
-### The bread and butter of our simulation, our run statement. We define our variables and then perform a while loop for N turns. Our graph ends up as a list of X and Y and is graphed.
+### The bread and butter of our simulation, our run statement. We define our variables and then perform a while loop for N turns. Our position ends up as a list of X and Y and is graphed.
     def run_sim(k=0.5, gy=-4.81):
         wormhole = Box(25,30,15,20)
         universe = Box(0,50,0,50)
@@ -145,6 +145,6 @@
         plt.ylim(-1, 51)
         fig.canvas.draw()
     
-### we create and interactive graph to alter the spring coefficient and the power of gravity to see their effect on the particle.
+### We create an interactive graph to alter the spring coefficient and the power of gravity to see their effect on the particle.
     attributes = interactive(run_sim, k=(0.1,2,0.1), gy=(-10.0, -1.0, 0.5), continuous_update=True)
     attributes
